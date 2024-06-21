@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form id="form-id">
+      <label for="product">Products</label> <br />
+      <input type="text" id="product" required /> <br />
+
+      <label for="review">Review</label><br />
+      <textarea id="review" rows="3" required></textarea><br />
+      <button type="submit">Add review</button>
+    </form>
+
+    <ul id="list-product"></ul>
+    <div id="content" style="display: none">
+      <h2 id="product-name"></h2>
+      <ul id="product-review" class="review-list"></ul>
+    </div>
+
+    <script>
+      function addReview(params) {
+        params.preventDefault();
+        const product = document.getElementById("product").value;
+        const review = document.getElementById("review").value;
+
+        const reviewEl = { product, review };
+
+        const reviews = JSON.parse(localStorage.getItem("reviews")) || [];
+        reviews.push(reviewEl);
+        localStorage.setItem("reviews", JSON.stringify(reviews));
+        listProduct();
+      }
+      function listProduct() {
+        const reviews = JSON.parse(localStorage.getItem("reviews")) || [];
+        const listProduct = document.getElementById("list-product");
+        listProduct.innerHTML = "";
+        reviews.forEach((element) => {
+          const liEl = document.createElement("li");
+          liEl.textContent = element.product;
+          liEl.addEventListener("click", () => {
+            listReviews(element.product);
+          });
+          listProduct.appendChild(liEl);
+        });
+      }
+      function listReviews(product) {
+        const reviews = JSON.parse(localStorage.getItem("reviews")) || [];
+        const title = document.getElementById("product-name");
+        const descripList = document.getElementById("product-review");
+
+        title.textContent = `Reviews about ${product}:`;
+        descripList.innerHTML = "";
+
+        reviews.forEach((element) => {
+          if (element.product === product) {
+            const liEl = document.createElement("li");
+            liEl.textContent = element.review;
+
+            const btnEl = document.createElement("span");
+            btnEl.textContent = " Delete";
+            btnEl.className = "btn-delete";
+            btnEl.addEventListener("click", () => {
+              deleteReview(element);
+            });
+            liEl.appendChild(btnEl);
+            descripList.appendChild(liEl);
+          }
+        });
+        document.getElementById("content").style.display = "block";
+      }
+      function deleteReview(reviewDel) {
+        let reviews = JSON.parse(localStorage.getItem("reviews")) || [];
+        reviews = reviews.filter(
+          (review) =>
+            !(
+              review.product === reviewDel.product &&
+              review.review === reviewDel.review
+            )
+        );
+        localStorage.setItem("reviews", JSON.stringify(reviews));
+        listProduct();
+        document.getElementById("content").style.display = "none";
+      }
+      listProduct();
+      document.getElementById("form-id").addEventListener("submit", addReview);
+    </script>
+  </body>
+</html>
